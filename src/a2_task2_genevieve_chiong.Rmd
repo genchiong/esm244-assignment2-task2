@@ -1,0 +1,92 @@
+---
+title: "Florida Palmetto"
+author: "Genevieve Chiong"
+date: "1/31/2021"
+output:
+   html_document:
+     code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(GGally)
+library(broom)
+library(jtools)
+library(here)
+```
+
+
+Data source: Abrahamson, W.G. 2019. Survival, growth and biomass estimates of two dominant palmetto species of south-central Florida from 1981 - 2017, ongoing at 5-year intervals ver 1. Environmental Data Initiative. https://doi.org/10.6073/pasta/f2f96ec76fbbd4b9db431c79a770c4d5
+
+```{r}
+# Read in the data
+palmetto <- read_csv(here("data", "palmetto.csv")) %>% 
+  mutate(species_name = case_when(species == 1 ~ "Serenoa repens",
+                                  species == 2 ~ "Sabal etonia")) %>% 
+  select(species_name, height:green_lvs)
+  
+
+palmetto$species_name <- as.factor(palmetto$species_name)
+```
+
+### Data visualizations exploring differences in height, canopy length, canopy width, and green leaves for Sabal etonia and Serenoa repens
+```{r}
+palmetto %>% # Take a look at the data 
+  ggpairs(aes(color = species_name)) 
+
+levels(palmetto$species_name) # Check the levels (Sabal etonia is 0, Serenoa repens is 1)
+```
+
+```{r, fig.cap = "**Figure 1.** Comparison of plant height (cm) and canopy length (cm) between two Florida palmetto species, Sabal etonia (teal) and Serenoa repens (magenta), using data from 1981-2017. Data: Abrahamson, W.G. 2019"}
+
+# Look at trends across variables for the two palmetto species 
+
+# Graph of height vs. canopy length
+ggplot(data = palmetto, 
+       aes(x = height, 
+           y = length)) +
+  geom_point(aes(color = species_name)) +
+  facet_wrap(~species_name) +
+  scale_color_manual(values=c("cadetblue4", "mediumvioletred")) +
+  labs(x = "\nHeight (cm)",
+       y = "Canopy Length (cm)\n", 
+       color = "Species") +
+  theme_minimal() 
+```
+
+Sabal etonia and Serenoa erpens have overall similar plant height (cm) and canopy length (cm). However, Sabal etonia has a slightly larger canopy length and Serenoa repens has a slightly greater height. 
+
+```{r, fig.cap = "**Figure 2.** Comparison of canopy width (cm) and green leaves count between two Florida palmetto species, Sabal etonia (teal) and Serenoa repens (magenta), using data from 1981-2017. Data: Abrahamson, W.G. 2019."}
+
+# Graph of canopy width vs green leaves count 
+ggplot(data = palmetto, 
+       aes(x = width, 
+           y = green_lvs)) +
+  geom_point(aes(color = species_name)) +
+  facet_wrap(~species_name) +
+  scale_color_manual(values=c("cadetblue4", "mediumvioletred")) +
+  labs(x = "\nCanopy Width (cm)",
+       y = "Green Leaves Count\n", 
+       color = "Species") +
+  theme_minimal() 
+```
+
+Sabal etonia has a slightly larger canopy width (cm) than Serenoa repens, whereas Serenoa repens has considerably more green leaves. 
+
+### Binary Logistic Regression 
+
+
+
+
+
+The output should be a finalized table containing the binary logistic regression model results (at least coefficients, standard errors for the coefficients, and information for significance - consider using broom::tidy() to get you most of the way). 
+
+
+
+
+
+
+
+
