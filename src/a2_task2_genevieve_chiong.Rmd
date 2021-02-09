@@ -34,16 +34,17 @@ palmetto_clean <- palmetto %>%
 palmetto_clean$species_name <- as.factor(palmetto_clean$species_name)
 ```
 
-#### **Data visualizations exploring differences in height, canopy length, canopy width, and green leaves for two Florida palmetto species, *Sabal etonia* and *Serenoa repens***
+#### **Data visualizations exploring differences in plant height, canopy length, canopy width, and number of green leaves for two Florida palmetto species, *Sabal etonia* and *Serenoa repens***
 ```{r}
 # Take a look at the data
 #palmetto_clean %>% 
   #ggpairs(aes(color = species_name)) 
 
-levels(palmetto_clean$species_name) # Check the levels (Sabal etonia is 0, Serenoa repens is 1)
+# Check the levels (Sabal etonia is 0, Serenoa repens is 1)
+#levels(palmetto_clean$species_name) 
 ```
 
-```{r, fig.cap = "**Figure 1.** Comparison of plant height (cm) and canopy length (cm) between two Florida palmetto species, *Sabal etonia* (teal) and *Serenoa repens* (magenta), using data from 1981-2017. Data: Abrahamson, W.G. 2019"}
+```{r, fig.cap = "**Figure 1.** Comparison of plant height (cm) and canopy length (cm) between two Florida palmetto species, *Sabal etonia* (teal) and *Serenoa repens* (magenta), using data from 1981-2017. Data: Abrahamson, W.G. 2019."}
 
 # Look at trends across variables for the two palmetto species 
 
@@ -62,9 +63,9 @@ ggplot(data = palmetto_clean,
 
 *Sabal etonia* and *Serenoa erpens* have overall similar plant height (cm) and canopy length (cm). However, *Sabal etonia* has a slightly larger canopy length and *Serenoa repens* has a slightly greater height. 
 
-```{r, fig.cap = "**Figure 2.** Comparison of canopy width (cm) and green leaves count between two Florida palmetto species, *Sabal etonia* (teal) and *Serenoa repens* (magenta), using data from 1981-2017. Data: Abrahamson, W.G. 2019."}
+```{r, fig.cap = "**Figure 2.** Comparison of canopy width (cm) and number of green leaves between two Florida palmetto species, *Sabal etonia* (teal) and *Serenoa repens* (magenta), using data from 1981-2017. Data: Abrahamson, W.G. 2019."}
 
-# Graph of canopy width vs green leaves count 
+# Graph of canopy width vs number of green leaves
    
    ggplot(data = palmetto_clean, 
        aes(x = width, 
@@ -83,8 +84,9 @@ ggplot(data = palmetto_clean,
 #### **Binary Logistic Regression**
 
 ```{r}
-# Binary logistic regression using plant height, canopy length, canopy width, and green leaves as predictor values to understand how they relate to the probaiblity of a plant being Serenoa repens or Sabal etonia
-# Sabal etonia is first '0' factor level, Serenoa repens is '1')
+# Binary logistic regression using plant height, canopy length, canopy width, and number of green leaves as predictor values to understand how they relate to the probability of a plant being Serenoa repens or Sabal etonia
+
+# Sabal etonia is first '0' factor level, Serenoa repens is '1'
 
 palmetto_blr <- glm(species_name ~ height + length + width + green_lvs, 
                     data = palmetto_clean,
@@ -96,36 +98,34 @@ palmetto_blr <- glm(species_name ~ height + length + width + green_lvs,
 #summary(palmetto_blr)
 
 # Get a tidy version w/broom
-blr_tidy <- broom::tidy(palmetto_blr) 
-
+palmetto_blr_tidy <- broom::tidy(palmetto_blr)
+  
 # Coefficients are for the predictor variables that relate to the log odds of the "Serenoa repens" outcome (level = 1)
 
-#summary(blr_tidy)
+#summary(palmetto_blr_tidy)
 ```
 
-**Table 1.** The binary logistic regression model results for four predictor variables: plant height, canopy length, canopy width, and green leaves that relate to the log odds of the *Serenoa repens* outcome. Data: Abrahamson, W.G. 2019.
+**Table 1.** The binary logistic regression model results using plant height, canopy length, canopy width, and number of green leaves as predictor variables that relate to the probability of a plant being *Serenoa repens*. Data: Abrahamson, W.G. 2019.
 
 ```{r}
 # Create a table containing the binary logistic regression model results
-kable(blr_tidy,
-      digits = 150,
+
+palmetto_blr_tidy$p.value[palmetto_blr_tidy$p.value < 0.0001] <- "<0.0001"
+
+kable(palmetto_blr_tidy,
       col.names = c("Term",
                     "Estimate",
                     "Standard Error",
                     "Statistic",
                     "P-value")) %>% 
   kable_styling(bootstrap_options = "striped",
-                full_width = FALSE)
-
-
-#r format(politics_tidy$p.value, scientific = TRUE, digits = 3)
-# `r format.pval(survey_tidy$p.value, digits = 1)`, which gave me , p <2e-16
+                full_width = FALSE) 
 ```
 
 
 #### **Classification success rate of binary logistic regression model** 
 
-**Table 2.** The number of *Serenoa repens* and *Sabal etonia* palmetta plants correctly and incorrectly classified using the binary logistic regression model for four predictor variables: plant height, canopy length, canopy width, and green leaves. Data: Abrahamson, W.G. 2019.
+**Table 2.** The number of *Serenoa repens* and *Sabal etonia* palmetto plants correctly and incorrectly classified using the binary logistic regression model with four predictor variables: plant height, canopy length, canopy width, and number of green leaves. Data: Abrahamson, W.G. 2019.
 
 ```{r}
 # Evaluate how successfully the binary logistic regression model would "classify" a plant as the correct species, using a 50% cutoff 
